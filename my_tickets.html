@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Tickets &amp; Account - Bayisa Chance Lottery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <a href="{{ url_for('index') }}" class="logo">
+                <span class="logo-icon">🎰</span>
+                <div>
+                    <h1>Bayisa Chance Lottery</h1>
+                    <small style="color: var(--text-muted);">My Account &bull; {{ user.name }}</small>
+                </div>
+            </a>
+            <nav class="nav-links">
+                <a href="{{ url_for('index') }}" class="nav-item">🏠 Home</a>
+                <a href="{{ url_for('boxes_grid') }}" class="nav-item">📦 200 Boxes</a>
+                <a href="{{ url_for('register') }}" class="btn btn-primary" style="padding: 0.35rem 0.85rem; font-size: 0.85rem;">+ Buy Another Box</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary" style="padding: 0.35rem 0.85rem; font-size: 0.85rem;">🚪 Logout</a>
+            </nav>
+        </header>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- User Profile Card -->
+        <div class="round-card" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h2 style="color: #fbbf24; font-size: 1.4rem;">👋 Hello, {{ user.name }}!</h2>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">
+                    Phone: <strong>{{ user.phone }}</strong> &bull; Member since: {{ user.created_at }}
+                </p>
+            </div>
+            <div>
+                <a href="{{ url_for('register') }}" class="btn btn-primary">
+                    ➕ Pick Another Box (100.05 Birr)
+                </a>
+            </div>
+        </div>
+
+        <!-- My Tickets Table -->
+        <div class="card-table">
+            <div class="table-header">
+                <h2>🎟️ My Registered Tickets ({{ tickets|length }})</h2>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ticket ID</th>
+                            <th>Box #</th>
+                            <th>Total Fee</th>
+                            <th>Payment Method</th>
+                            <th>Payment Status</th>
+                            <th>Draw Outcome</th>
+                            <th style="text-align: right;">Receipt</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if tickets %}
+                            {% for t in tickets %}
+                                <tr>
+                                    <td><span class="badge-code">{{ t['ticket_number'] }}</span></td>
+                                    <td>
+                                        {% if t['box_number'] %}
+                                            <span class="badge-box">📦 Box #{{ t['box_number'] }}</span>
+                                        {% else %}
+                                            <a href="{{ url_for('select_box', ticket_id=t['id']) }}" class="btn btn-primary" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">Select Box</a>
+                                        {% endif %}
+                                    </td>
+                                    <td><strong style="color: #34d399;">100.05 Birr</strong></td>
+                                    <td>
+                                        {% if t['payment_method'] %}
+                                            <span style="font-weight: 700;">{{ t['payment_method'] }}</span>
+                                        {% else %}
+                                            <span style="color: var(--text-muted);">Unselected</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if t['payment_status'] == 'Confirmed' %}
+                                            <span class="badge badge-winner">✔ Confirmed</span>
+                                        {% elif t['payment_method'] %}
+                                            <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b;">⏳ Pending</span>
+                                        {% else %}
+                                            <a href="{{ url_for('payment', ticket_id=t['id']) }}" class="btn btn-primary" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">Pay 100.05 Birr</a>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if t['rank'] == 1 %}
+                                            <span class="badge badge-rank1">🥇 Rank 1 ({{ t['prize'] }})</span>
+                                        {% elif t['rank'] == 2 %}
+                                            <span class="badge badge-rank2">🥈 Rank 2 ({{ t['prize'] }})</span>
+                                        {% elif t['rank'] == 3 %}
+                                            <span class="badge badge-rank3">🥉 Rank 3 ({{ t['prize'] }})</span>
+                                        {% elif t['is_winner'] == 1 %}
+                                            <span class="badge badge-winner">🏆 Winner</span>
+                                        {% else %}
+                                            <span class="badge badge-active">In Play</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <a href="{{ url_for('view_ticket', ticket_id=t['id']) }}" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">
+                                            Print Slip
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
+                                    You haven't purchased any tickets yet. Click below to select your first box!
+                                    <br><br>
+                                    <a href="{{ url_for('register') }}" class="btn btn-primary">Pick Your Lucky Box</a>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2026 Bayisa Chance Lottery System &bull; Support: <a href="tel:0952458502" style="color: var(--accent-gold);">0952458502</a></p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>200 Boxes Live Grid - Bayisa Chance Lottery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <a href="{{ url_for('index') }}" class="logo">
+                <span class="logo-icon">🎰</span>
+                <div>
+                    <h1>Bayisa Chance Lottery</h1>
+                    <small style="color: var(--text-muted);">200 Boxes Selection Grid</small>
+                </div>
+            </a>
+            <nav class="nav-links">
+                <a href="{{ url_for('index') }}" class="nav-item">🏠 Home</a>
+                <a href="{{ url_for('boxes_grid') }}" class="nav-item active">📦 200 Boxes Grid</a>
+                <a href="{{ url_for('register') }}" class="nav-item">🎟️ Register Ticket</a>
+                <a href="{{ url_for('check_ticket') }}" class="nav-item">🔍 Check Ticket</a>
+                <a href="{{ url_for('contact') }}" class="nav-item">📞 Contact</a>
+                {% if current_user %}
+                    <a href="{{ url_for('my_tickets') }}" class="nav-item" style="color: #fbbf24;">👤 {{ current_user.name }}</a>
+                    <a href="{{ url_for('logout') }}" class="btn btn-secondary" style="padding: 0.35rem 0.7rem; font-size: 0.8rem;">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-secondary" style="padding: 0.35rem 0.85rem; font-size: 0.85rem;">🔑 Log In</a>
+                {% endif %}
+                <a href="{{ url_for('admin') }}" class="nav-item">⚙️ Admin</a>
+            </nav>
+        </header>
+
+        <!-- Round Banner -->
+        <div class="round-card">
+            <div class="round-header">
+                <div>
+                    <h2 class="round-title" style="font-size: 1.4rem;">📦 200 Lucky Boxes — Round #{{ stats.active_round }}</h2>
+                    <p style="color: var(--text-muted);">Each round consists of exactly 200 boxes. Pick your lucky number before it's taken!</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('register') }}" class="btn btn-primary">+ Claim a Box Now</a>
+                </div>
+            </div>
+            <div class="progress-track" style="margin-top: 1rem;">
+                <div class="progress-fill" style="width: {{ stats.percent_booked }}%;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.85rem;">
+                <span style="color: #34d399;"><strong>{{ stats.boxes_available }}</strong> Available Boxes</span>
+                <span style="color: #f87171;"><strong>{{ stats.boxes_booked }}</strong> Booked Boxes</span>
+            </div>
+        </div>
+
+        <!-- 200 Boxes Board -->
+        <div class="boxes-container">
+            <div class="legend-bar">
+                <div class="legend-item"><span class="legend-sample legend-available"></span> <strong>Available (Click to Select)</strong></div>
+                <div class="legend-item"><span class="legend-sample legend-taken"></span> <strong>Already Booked</strong></div>
+            </div>
+
+            <div class="grid-200">
+                {% for b in boxes %}
+                    {% if b.is_taken %}
+                        <div class="box-item taken" title="Box #{{ b.box_number }} - Booked by {{ b.name }}">
+                            <span>{{ b.box_number }}</span>
+                        </div>
+                    {% else %}
+                        <a href="{{ url_for('register', box=b.box_number) }}" class="box-item available" title="Click to claim Box #{{ b.box_number }}">
+                            <span>{{ b.box_number }}</span>
+                        </a>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2026 Bayisa Chance Lottery System &bull; 📞 Call: <a href="tel:0952458502" style="color: var(--accent-gold);">0952458502</a></p>
+        </footer>
+    </div>
+</body>
+</html>

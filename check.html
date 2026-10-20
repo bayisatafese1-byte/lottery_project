@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Verification &amp; Checker - Bayisa Chance Lottery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <a href="{{ url_for('index') }}" class="logo">
+                <span class="logo-icon">🎰</span>
+                <div>
+                    <h1>Bayisa Chance Lottery</h1>
+                    <small style="color: var(--text-muted);">Ticket Verification &amp; Winner Checker</small>
+                </div>
+            </a>
+            <nav class="nav-links">
+                <a href="{{ url_for('index') }}" class="nav-item">🏠 Home</a>
+                <a href="{{ url_for('boxes_grid') }}" class="nav-item">📦 200 Boxes Grid</a>
+                <a href="{{ url_for('register') }}" class="nav-item">🎟️ Register Ticket</a>
+                <a href="{{ url_for('check_ticket') }}" class="nav-item active">🔍 Check Ticket</a>
+                <a href="{{ url_for('contact') }}" class="nav-item">📞 Contact (0952458502)</a>
+                <a href="{{ url_for('admin') }}" class="nav-item">⚙️ Admin</a>
+            </nav>
+        </header>
+
+        <!-- Search Card -->
+        <div class="form-card" style="margin-top: 1rem; max-width: 700px;">
+            <h2>🔍 Check Your Ticket Status</h2>
+            <p class="subtitle">Enter your <strong>Phone Number</strong>, <strong>Ticket Code</strong> (e.g. LOT-123456), or <strong>Box Number</strong> (1 - 200):</p>
+
+            <form action="{{ url_for('check_ticket') }}" method="GET" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <input 
+                    type="text" 
+                    name="q" 
+                    class="form-control" 
+                    style="flex: 1; min-width: 250px;" 
+                    placeholder="e.g. 0911223344 or LOT-782914 or 45" 
+                    value="{{ query }}" 
+                    required
+                >
+                <button type="submit" class="btn btn-primary" style="padding: 0.8rem 1.6rem;">
+                    🔎 Verify Now
+                </button>
+            </form>
+        </div>
+
+        <!-- Search Results -->
+        {% if query %}
+            <div class="card-table" style="max-width: 900px; margin: 0 auto 3rem;">
+                <div class="table-header">
+                    <h2>Found {{ results|length }} Result(s) for "{{ query }}"</h2>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ticket ID</th>
+                                <th>Participant</th>
+                                <th>Phone</th>
+                                <th>Selected Box</th>
+                                <th>Payment</th>
+                                <th>Draw Status</th>
+                                <th>Receipt</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if results %}
+                                {% for r in results %}
+                                    <tr>
+                                        <td><span class="badge-code">{{ r['ticket_number'] }}</span></td>
+                                        <td><strong>{{ r['name'] }}</strong></td>
+                                        <td>{{ r['phone'] }}</td>
+                                        <td>
+                                            {% if r['box_number'] %}
+                                                <span class="badge-box">📦 Box #{{ r['box_number'] }}</span>
+                                            {% else %}
+                                                <span style="color: var(--text-muted);">None</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if r['payment_status'] == 'Confirmed' %}
+                                                <span class="badge badge-winner" style="background: rgba(16, 185, 129, 0.2); color: #34d399;">✔ {{ r['payment_method'] }} Paid</span>
+                                            {% elif r['payment_method'] %}
+                                                <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b;">⏳ {{ r['payment_method'] }} Pending</span>
+                                            {% else %}
+                                                <a href="{{ url_for('payment', ticket_id=r['id']) }}" class="btn btn-primary" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">Pay</a>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if r['is_winner'] == 1 %}
+                                                <span class="badge badge-winner">🏆 WINNER!</span>
+                                            {% else %}
+                                                <span class="badge badge-active">In Play</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('view_ticket', ticket_id=r['id']) }}" class="btn btn-secondary" style="padding: 0.3rem 0.7rem; font-size: 0.8rem;">
+                                                Slip
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">
+                                        No tickets found matching "{{ query }}". Need help? Call support at <strong>0952458502</strong>.
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2026 Bayisa Chance Lottery System &bull; Support: <a href="tel:0952458502" style="color: var(--accent-gold);">0952458502</a></p>
+        </footer>
+    </div>
+</body>
+</html>

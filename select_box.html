@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Your Lucky Box (1 - 200) - Bayisa Chance Lottery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .selection-panel {
+            background: #1e293b;
+            border: 2px solid var(--accent-gold);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <a href="{{ url_for('index') }}" class="logo">
+                <span class="logo-icon">🎰</span>
+                <div>
+                    <h1>Bayisa Chance Lottery</h1>
+                    <small style="color: var(--text-muted);">Step 2: Box Selection</small>
+                </div>
+            </a>
+            <nav class="nav-links">
+                <a href="{{ url_for('index') }}" class="nav-item">🏠 Home</a>
+                <a href="{{ url_for('boxes_grid') }}" class="nav-item">📦 200 Boxes Grid</a>
+                <a href="{{ url_for('contact') }}" class="nav-item">📞 Contact (0952458502)</a>
+            </nav>
+        </header>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Selection Panel -->
+        <div class="selection-panel">
+            <h2 style="color: var(--accent-gold); margin-bottom: 0.5rem;">
+                👋 Welcome, {{ ticket['name'] }}!
+            </h2>
+            <p style="color: var(--text-muted);">
+                Ticket ID: <span class="badge-code">{{ ticket['ticket_number'] }}</span> &bull; 
+                Phone: <strong>{{ ticket['phone'] }}</strong>
+            </p>
+            <p style="margin-top: 0.75rem; font-size: 1.05rem;">
+                👉 Click any <strong style="color: #34d399;">GREEN</strong> box below to select your Lucky Box (1 to 200):
+            </p>
+
+            <form id="box-form" action="{{ url_for('select_box', ticket_id=ticket['id']) }}" method="POST" style="margin-top: 1.25rem;">
+                <input type="hidden" id="selected-box-input" name="box_number" value="">
+                
+                <div id="selection-confirm-bar" style="display: none; margin-bottom: 1rem;">
+                    <div style="font-size: 1.4rem; font-weight: 800; color: #fbbf24; margin-bottom: 0.75rem;">
+                        Selected: <span id="chosen-box-display">BOX #--</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="padding: 0.8rem 2rem; font-size: 1.1rem;">
+                        🔒 Lock In Box &amp; Proceed to Payment (CBE / Telebirr) ➔
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 200-Box Grid -->
+        <div class="boxes-container">
+            <div class="legend-bar">
+                <div class="legend-item"><span class="legend-sample legend-available"></span> <strong>Available (Click to Pick)</strong></div>
+                <div class="legend-item"><span class="legend-sample legend-taken"></span> <strong>Already Booked</strong></div>
+                <div class="legend-item"><span class="legend-sample legend-selected"></span> <strong>Your Choice</strong></div>
+            </div>
+
+            <div class="grid-200">
+                {% for b in boxes %}
+                    {% if b.is_taken %}
+                        <div class="box-item taken" title="Box #{{ b.box_number }} - Taken">
+                            {{ b.box_number }}
+                        </div>
+                    {% else %}
+                        <div 
+                            class="box-item available" 
+                            id="box-elem-{{ b.box_number }}" 
+                            onclick="pickBox({{ b.box_number }})"
+                            title="Click to select Box #{{ b.box_number }}"
+                        >
+                            {{ b.box_number }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2026 Bayisa Chance Lottery System &bull; Agent: <a href="tel:0952458502" style="color: var(--accent-gold);">0952458502</a></p>
+        </footer>
+    </div>
+
+    <script>
+        let currentSelected = null;
+
+        function pickBox(num) {
+            // Remove selection class from previous
+            if (currentSelected !== null) {
+                const prev = document.getElementById('box-elem-' + currentSelected);
+                if (prev) {
+                    prev.classList.remove('selected');
+                }
+            }
+
+            currentSelected = num;
+            const chosen = document.getElementById('box-elem-' + num);
+            if (chosen) {
+                chosen.classList.add('selected');
+            }
+
+            document.getElementById('selected-box-input').value = num;
+            document.getElementById('chosen-box-display').textContent = 'BOX #' + num;
+            document.getElementById('selection-confirm-bar').style.display = 'block';
+
+            // Smooth scroll up to confirm bar if needed
+            window.scrollTo({ top: 120, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

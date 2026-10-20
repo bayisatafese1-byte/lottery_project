@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Bayisa Chance Lottery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <a href="{{ url_for('index') }}" class="logo">
+                <span class="logo-icon">🎰</span>
+                <div>
+                    <h1>Bayisa Chance Admin</h1>
+                    <small style="color: var(--accent-gold);">System Management Portal &bull; Round #{{ stats.active_round }}</small>
+                </div>
+            </a>
+            <nav class="nav-links">
+                <a href="{{ url_for('index') }}" class="nav-item">🏠 View Public Site</a>
+                <a href="{{ url_for('boxes_grid') }}" class="nav-item">📦 200 Boxes Grid</a>
+                <a href="{{ url_for('admin_logout') }}" class="btn btn-secondary" style="padding: 0.4rem 0.9rem; font-size: 0.85rem;">
+                    🚪 Log Out
+                </a>
+            </nav>
+        </header>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- 16-Day Timer Status in Admin -->
+        <div class="round-card" style="border: 1px solid #f59e0b; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <span style="color: var(--accent-gold); font-weight: 700; font-size: 1.1rem;">⏱️ 16-Day Round Deadline Status:</span>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.2rem;">
+                    Target: <strong style="color: #fbbf24;">{{ deadline.deadline_display }}</strong> &bull; 
+                    Remaining: <strong style="color: #34d399;">{{ deadline.days }}d {{ deadline.hours }}h {{ deadline.minutes }}m</strong>
+                </p>
+            </div>
+            <div>
+                {% if stats.auto_drawn %}
+                    <span class="badge badge-winner" style="font-size: 0.9rem; padding: 0.5rem 1rem;">✅ Draw Already Completed for Round #{{ stats.active_round }}</span>
+                {% else %}
+                    <span class="badge" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; font-size: 0.85rem; padding: 0.5rem 1rem;">
+                        ⚡ Auto-Draw Armed (Triggers at 200 Boxes or Deadline)
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Stats Row -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📦</div>
+                <div class="stat-details">
+                    <h3>Boxes Booked</h3>
+                    <p style="color: #fbbf24;">{{ stats.boxes_booked }} <small style="font-size: 0.85rem; color: var(--text-muted);">/ 200</small></p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🟢</div>
+                <div class="stat-details">
+                    <h3>Boxes Available</h3>
+                    <p style="color: #34d399;">{{ stats.boxes_available }}</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-details">
+                    <h3>Pending Payments</h3>
+                    <p style="color: #f59e0b;">{{ stats.pending_payments }}</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-details">
+                    <h3>Confirmed Paid</h3>
+                    <p style="color: #10b981;">{{ stats.confirmed_payments }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Management Control Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem;">
+            <!-- Official 3-Spin Draw Controller -->
+            <div class="round-card" style="margin: 0; border: 2px solid var(--accent-gold);">
+                <h3 style="color: var(--accent-gold); margin-bottom: 0.5rem; font-size: 1.25rem;">
+                    🎲 3-Spin Official Draw (Rank 1, 2, 3)
+                </h3>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.25rem;">
+                    Spins the lottery wheel 3 times to pick Rank 1, Rank 2, and Rank 3 winners among booked boxes.
+                </p>
+
+                <form action="{{ url_for('admin_draw') }}" method="POST">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem;">
+                        <div>
+                            <label style="font-size: 0.75rem; color: #fbbf24;">🥇 Rank 1 Prize</label>
+                            <input type="text" name="prize1" class="form-control" value="100,000 ETB" required style="font-size: 0.85rem; padding: 0.5rem;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75rem; color: #e2e8f0;">🥈 Rank 2 Prize</label>
+                            <input type="text" name="prize2" class="form-control" value="30,000 ETB" required style="font-size: 0.85rem; padding: 0.5rem;">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.75rem; color: #fed7aa;">🥉 Rank 3 Prize</label>
+                            <input type="text" name="prize3" class="form-control" value="15,000 ETB" required style="font-size: 0.85rem; padding: 0.5rem;">
+                        </div>
+                    </div>
+                    <button 
+                        type="submit" 
+                        class="btn btn-action" 
+                        style="width: 100%; justify-content: center; padding: 0.85rem;"
+                        onclick="return confirm('Spin 3 times and draw winners for Rank 1, 2, and 3 now?');"
+                    >
+                        ⚡ SPIN 3 TIMES FOR RANK 1, 2, 3 NOW
+                    </button>
+                </form>
+            </div>
+
+            <!-- Round Reset / New Round Controller -->
+            <div class="round-card" style="margin: 0; border: 1px solid #475569;">
+                <h3 style="color: #60a5fa; margin-bottom: 0.5rem; font-size: 1.25rem;">
+                    🔄 Round Lifecycle &amp; 16-Day Reset
+                </h3>
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.25rem;">
+                    Current Active Round: <strong style="color: #fbbf24;">Round #{{ stats.active_round }}</strong>. 
+                    Click below to open fresh 200 boxes and reset the 16-day countdown clock for Round #{{ stats.active_round + 1 }}.
+                </p>
+
+                <form action="{{ url_for('admin_new_round') }}" method="POST">
+                    <button 
+                        type="submit" 
+                        class="btn btn-secondary" 
+                        style="width: 100%; justify-content: center; padding: 0.85rem; border: 1px solid #3b82f6;"
+                        onclick="return confirm('Start a brand new round? All 200 boxes will be reset and a fresh 16-day clock will start.');"
+                    >
+                        ✨ Start New Round (Round #{{ stats.active_round + 1 }})
+                    </button>
+                </form>
+                <small style="color: var(--text-muted); display: block; margin-top: 0.75rem;">
+                    Past winners and tickets are permanently preserved in the archive.
+                </small>
+            </div>
+        </div>
+
+        <!-- 200 Boxes Master Management Table with Payments & Ranks -->
+        <div class="card-table">
+            <div class="table-header">
+                <h2>📦 200 Boxes &amp; Payment List — Round #{{ stats.active_round }}</h2>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">
+                    CBE: <strong style="color: #fbbf24;">{{ cbe_account }}</strong> &bull; Telebirr: <strong style="color: #38bdf8;">{{ telebirr_account }}</strong>
+                </div>
+            </div>
+
+            <div class="table-responsive" style="max-height: 540px; overflow-y: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 85px;">Box #</th>
+                            <th>Participant</th>
+                            <th>Phone</th>
+                            <th>Ticket Code</th>
+                            <th>Payment</th>
+                            <th>Status</th>
+                            <th>Rank</th>
+                            <th style="text-align: right;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for b in boxes %}
+                            <tr>
+                                <td>
+                                    <strong style="font-size: 1.05rem; color: {% if b.is_taken %}#f87171{% else %}#34d399{% endif %};">
+                                        BOX #{{ b.box_number }}
+                                    </strong>
+                                </td>
+                                <td>
+                                    {% if b.is_taken %}
+                                        <strong>{{ b.name }}</strong>
+                                    {% else %}
+                                        <span style="color: var(--text-muted);">— Available —</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ b.phone if b.phone else '—' }}</td>
+                                <td>
+                                    {% if b.ticket_number %}
+                                        <span class="badge-code">{{ b.ticket_number }}</span>
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if b.payment_method %}
+                                        <span style="font-weight: 700;">{{ b.payment_method }}</span>
+                                        <small style="display: block; color: var(--text-muted); font-family: monospace;">{{ b.payment_reference }}</small>
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if b.is_taken %}
+                                        {% if b.payment_status == 'Confirmed' %}
+                                            <span class="badge badge-winner">✔ Paid</span>
+                                        {% else %}
+                                            <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b;">⏳ Pending</span>
+                                        {% endif %}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if b.rank == 1 %}
+                                        <span class="badge badge-rank1">🥇 Rank 1</span>
+                                    {% elif b.rank == 2 %}
+                                        <span class="badge badge-rank2">🥈 Rank 2</span>
+                                    {% elif b.rank == 3 %}
+                                        <span class="badge badge-rank3">🥉 Rank 3</span>
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td style="text-align: right; white-space: nowrap;">
+                                    {% if b.is_taken %}
+                                        {% if b.payment_status != 'Confirmed' and b.ticket_id %}
+                                            <form action="{{ url_for('admin_approve_payment', ticket_id=b.ticket_id) }}" method="POST" style="display: inline;">
+                                                <button type="submit" class="btn btn-green" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;" title="Approve Payment">
+                                                    ✔ Confirm
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                        <form action="{{ url_for('admin_release_box') }}" method="POST" style="display: inline;">
+                                            <input type="hidden" name="box_number" value="{{ b.box_number }}">
+                                            <button 
+                                                type="submit" 
+                                                class="btn btn-danger" 
+                                                style="padding: 0.25rem 0.6rem; font-size: 0.75rem;"
+                                                onclick="return confirm('Release Box #{{ b.box_number }}?');"
+                                                title="Release / Cancel Box"
+                                            >
+                                                Release
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <a href="{{ url_for('register', box=b.box_number) }}" class="btn btn-primary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">
+                                            Assign
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Past Draws History with 3 Ranks -->
+        {% if draws %}
+            <div class="card-table">
+                <div class="table-header">
+                    <h2>📜 Official Draws Archive ({{ draws|length }})</h2>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Round</th>
+                                <th>Draw Time</th>
+                                <th>🥇 1st Place (Rank 1)</th>
+                                <th>🥈 2nd Place (Rank 2)</th>
+                                <th>🥉 3rd Place (Rank 3)</th>
+                                <th>Balls</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in draws %}
+                                <tr>
+                                    <td><strong>Round #{{ d['round'] }}</strong></td>
+                                    <td style="color: var(--text-muted); font-size: 0.85rem;">{{ d['draw_time'] }}</td>
+                                    <td>
+                                        <strong style="color: #fbbf24;">{{ d['rank1_name'] if d['rank1_name'] else d['winner_name'] }}</strong>
+                                        <small style="display: block; color: var(--text-muted);">
+                                            Box #{{ d['rank1_box'] if d['rank1_box'] else d['winning_box'] }} &bull; {{ d['rank1_prize'] if d['rank1_prize'] else d['prize_amount'] }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <strong style="color: #e2e8f0;">{{ d['rank2_name'] if d['rank2_name'] else '—' }}</strong>
+                                        <small style="display: block; color: var(--text-muted);">
+                                            Box #{{ d['rank2_box'] }} &bull; {{ d['rank2_prize'] }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <strong style="color: #fed7aa;">{{ d['rank3_name'] if d['rank3_name'] else '—' }}</strong>
+                                        <small style="display: block; color: var(--text-muted);">
+                                            Box #{{ d['rank3_box'] }} &bull; {{ d['rank3_prize'] }}
+                                        </small>
+                                    </td>
+                                    <td style="color: var(--accent-gold); font-weight: 600;">
+                                        {{ d['winning_numbers'] }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2026 Bayisa Chance Lottery System &bull; Admin Support: <a href="tel:{{ contact_phone }}" style="color: var(--accent-gold);">{{ contact_phone }}</a></p>
+        </footer>
+    </div>
+</body>
+</html>

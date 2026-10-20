@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Bayisa Chance Lottery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <a href="{{ url_for('index') }}" class="logo">
+                <span class="logo-icon">🎰</span>
+                <div>
+                    <h1>Bayisa Chance Lottery</h1>
+                    <small style="color: var(--text-muted);">Administration Area</small>
+                </div>
+            </a>
+            <nav class="nav-links">
+                <a href="{{ url_for('index') }}" class="nav-item">🏠 Home</a>
+                <a href="{{ url_for('contact') }}" class="nav-item">📞 Contact</a>
+            </nav>
+        </header>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Admin Login Form -->
+        <div class="form-card" style="max-width: 450px;">
+            <div style="text-align: center; font-size: 3rem; margin-bottom: 0.5rem;">🔒</div>
+            <h2>Admin Portal Access</h2>
+            <p class="subtitle">Enter the Administrator Security PIN to access lottery controls and draw management.</p>
+
+            <form action="{{ url_for('admin') }}" method="POST">
+                <div class="form-group">
+                    <label for="pin">Security PIN *</label>
+                    <input 
+                        type="password" 
+                        id="pin" 
+                        name="pin" 
+                        class="form-control" 
+                        placeholder="Default PIN: 1234" 
+                        required 
+                        autofocus
+                    >
+                    <small style="color: var(--text-muted); display: block; margin-top: 0.4rem;">
+                        Default PIN is <code style="color: var(--accent-gold);">1234</code>
+                    </small>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 0.85rem; font-size: 1.05rem;">
+                    🔓 Unlock Dashboard
+                </button>
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2026 Bayisa Chance Lottery System &bull; Support: <a href="tel:0952458502" style="color: var(--accent-gold);">0952458502</a></p>
+        </footer>
+    </div>
+</body>
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Payment - Bayisa Chance Lottery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .payment-methods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+            margin: 1.5rem 0;
+        }
+
+        .payment-card-option {
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .payment-card-option:hover {
+            border-color: #fbbf24;
+            transform: translateY(-2px);
+        }
+
+        .payment-card-option.active {
+            border-color: #fbbf24;
+            background: rgba(245, 158, 11, 0.08);
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.25);
+        }
+
+        .payment-card-option input[type="radio"] {
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+            accent-color: #f59e0b;
+            transform: scale(1.3);
+            cursor: pointer;
+        }
+
+        .account-box {
+            background: #1e293b;
+            border: 1px dashed #475569;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin: 0.75rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .account-number {
+            font-family: monospace;
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #fbbf24;
+        }
+
+        .copy-btn {
+            background: #334155;
+            color: #f8fafc;
+            border: 1px solid #64748b;
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            background: #f59e0b;
+            color: #0b1120;
+            border-color: #f59e0b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <a href="{{ url_for('index') }}" class="logo">
+                <span class="logo-icon">🎰</span>
+                <div>
+                    <h1>Bayisa Chance Lottery</h1>
+                    <small style="color: var(--text-muted);">Step 3: Secure Payment &amp; Confirmation</small>
+                </div>
+            </a>
+            <nav class="nav-links">
+                <a href="{{ url_for('index') }}" class="nav-item">🏠 Home</a>
+                <a href="{{ url_for('boxes_grid') }}" class="nav-item">📦 200 Boxes</a>
+                <a href="{{ url_for('contact') }}" class="nav-item">📞 Contact (0952458502)</a>
+            </nav>
+        </header>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Payment Card -->
+        <div class="form-card" style="max-width: 750px;">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <span style="font-size: 2.5rem;">💳</span>
+                <h2 style="color: #fbbf24; margin-top: 0.25rem;">Final Step: Complete Your Payment</h2>
+                <p class="subtitle" style="margin-bottom: 0.5rem;">
+                    Pay to confirm your ticket reservation for <strong>Box #{{ ticket['box_number'] }}</strong>
+                </p>
+            </div>
+
+            <!-- Booking Summary Box -->
+            <div style="background: #0f172a; border: 1px solid #334155; border-radius: var(--radius-sm); padding: 1.25rem; margin-bottom: 1.75rem;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+                    <div>
+                        <span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Participant</span>
+                        <div style="font-weight: 700; font-size: 1.05rem;">{{ ticket['name'] }}</div>
+                    </div>
+                    <div>
+                        <span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Phone Number</span>
+                        <div style="font-weight: 700; font-size: 1.05rem;">{{ ticket['phone'] }}</div>
+                    </div>
+                    <div>
+                        <span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Reserved Box</span>
+                        <div style="color: #fbbf24; font-weight: 800; font-size: 1.2rem;">📦 BOX #{{ ticket['box_number'] }}</div>
+                    </div>
+                    <div>
+                        <span style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase;">Total Amount Due</span>
+                        <div style="color: #34d399; font-weight: 800; font-size: 1.25rem;">100.05 Birr</div>
+                        <small style="color: var(--text-muted); font-size: 0.75rem;">(Ticket 100.00 + Fee 0.05)</small>
+                    </div>
+                </div>
+            </div>
+
+            <p style="font-weight: 600; font-size: 1rem; margin-bottom: 0.75rem;">
+                Please transfer exactly <strong style="color: #34d399;">100.05 Birr</strong> (Ticket 100.00 Birr + Service Fee 0.05 Birr) using ONE of the TWO options below:
+            </p>
+
+            <form action="{{ url_for('payment', ticket_id=ticket['id']) }}" method="POST">
+                <!-- Two Payment Methods Selection -->
+                <div class="payment-methods-grid">
+                    <!-- Method 1: CBE -->
+                    <label class="payment-card-option" id="card-cbe" onclick="selectMethod('CBE')">
+                        <input type="radio" name="payment_method" value="CBE" id="radio-cbe" required checked>
+                        <div style="font-size: 1.6rem; margin-bottom: 0.25rem;">🏦</div>
+                        <h3 style="font-size: 1.15rem; color: #f8fafc; margin-bottom: 0.25rem;">Commercial Bank of Ethiopia (CBE)</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Transfer via CBE Mobile Banking or Branch</p>
+                        
+                        <div class="account-box">
+                            <div>
+                                <small style="display: block; color: var(--text-muted); font-size: 0.75rem;">Account Number:</small>
+                                <span class="account-number" id="cbe-val">1000607576584</span>
+                            </div>
+                            <button type="button" class="copy-btn" onclick="copyText('1000607576584', event)">
+                                📋 Copy
+                            </button>
+                        </div>
+                        <small style="color: #94a3b8; font-size: 0.8rem;">Account Name: <strong>Bayisa Chance</strong></small>
+                    </label>
+
+                    <!-- Method 2: TELEBIRR -->
+                    <label class="payment-card-option" id="card-telebirr" onclick="selectMethod('Telebirr')">
+                        <input type="radio" name="payment_method" value="Telebirr" id="radio-telebirr" required>
+                        <div style="font-size: 1.6rem; margin-bottom: 0.25rem;">📱</div>
+                        <h3 style="font-size: 1.15rem; color: #f8fafc; margin-bottom: 0.25rem;">Telebirr</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Send money via Telebirr App or *127#</p>
+                        
+                        <div class="account-box">
+                            <div>
+                                <small style="display: block; color: var(--text-muted); font-size: 0.75rem;">Telebirr Number:</small>
+                                <span class="account-number" id="telebirr-val" style="color: #38bdf8;">0906619022</span>
+                            </div>
+                            <button type="button" class="copy-btn" onclick="copyText('0906619022', event)">
+                                📋 Copy
+                            </button>
+                        </div>
+                        <small style="color: #94a3b8; font-size: 0.8rem;">Account Name: <strong>Bayisa Chance</strong></small>
+                    </label>
+                </div>
+
+                <!-- Transaction Reference Input -->
+                <div class="form-group" style="margin-top: 1.5rem;">
+                    <label for="payment_reference">
+                        Transaction Reference ID / Confirmation SMS Code *
+                    </label>
+                    <input 
+                        type="text" 
+                        id="payment_reference" 
+                        name="payment_reference" 
+                        class="form-control" 
+                        placeholder="e.g. FT26109845 (for CBE) or TX982341 (for Telebirr)" 
+                        required
+                    >
+                    <small style="color: var(--text-muted); display: block; margin-top: 0.4rem;">
+                        Enter the transaction ID / receipt number you received in your payment confirmation SMS.
+                    </small>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 0.95rem; font-size: 1.1rem; margin-top: 1rem;">
+                    ✅ Submit Payment &amp; Get My Ticket
+                </button>
+            </form>
+
+            <div style="text-align: center; margin-top: 1.5rem; font-size: 0.85rem; color: var(--text-muted);">
+                Need assistance with payment? Call our agent at <a href="tel:0952458502" style="color: var(--accent-gold); font-weight: 700;">0952458502</a>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2026 Bayisa Chance Lottery System &bull; Support: <a href="tel:0952458502" style="color: var(--accent-gold);">0952458502</a></p>
+        </footer>
+    </div>
+
+    <!-- Script to copy and highlight -->
+    <script>
+        function selectMethod(method) {
+            const cbeCard = document.getElementById('card-cbe');
+            const telebirrCard = document.getElementById('card-telebirr');
+
+            if (method === 'CBE') {
+                cbeCard.classList.add('active');
+                telebirrCard.classList.remove('active');
+                document.getElementById('radio-cbe').checked = true;
+                document.getElementById('payment_reference').placeholder = 'e.g. FT26109845 (CBE Reference)';
+            } else {
+                telebirrCard.classList.add('active');
+                cbeCard.classList.remove('active');
+                document.getElementById('radio-telebirr').checked = true;
+                document.getElementById('payment_reference').placeholder = 'e.g. TX982341 (Telebirr Transaction ID)';
+            }
+        }
+
+        // Initialize active state
+        selectMethod('CBE');
+
+        function copyText(text, event) {
+            event.stopPropagation();
+            navigator.clipboard.writeText(text).then(function() {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ Copied!';
+                btn.style.background = '#10b981';
+                btn.style.borderColor = '#10b981';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#334155';
+                    btn.style.borderColor = '#64748b';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

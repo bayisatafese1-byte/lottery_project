@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Receipt #{{ ticket['ticket_number'] }} - Bayisa Chance</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        @media print {
+            header, footer, .no-print { display: none !important; }
+            body { background: #ffffff !important; color: #000000 !important; }
+            .ticket-slip { border-color: #000000 !important; box-shadow: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="no-print">
+            <a href="{{ url_for('index') }}" class="logo">
+                <span class="logo-icon">🎰</span>
+                <div>
+                    <h1>Bayisa Chance Lottery</h1>
+                    <small style="color: var(--text-muted);">Official Ticket Slip</small>
+                </div>
+            </a>
+            <nav class="nav-links">
+                <a href="{{ url_for('index') }}" class="nav-item">🏠 Home</a>
+                <a href="{{ url_for('boxes_grid') }}" class="nav-item">📦 200 Boxes</a>
+                <a href="{{ url_for('contact') }}" class="nav-item">📞 Contact</a>
+            </nav>
+        </header>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container no-print">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Ticket Slip -->
+        <div class="ticket-slip">
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <div style="font-size: 2.5rem; margin-bottom: 0.2rem;">🎟️</div>
+                <h2 style="color: #fbbf24; font-size: 1.5rem;">BAYISA CHANCE LOTTERY</h2>
+                <p style="color: var(--text-muted); font-size: 0.85rem;">Official Participation Receipt &bull; Round #{{ ticket['round'] }}</p>
+                <div style="margin-top: 0.8rem;">
+                    <span class="badge-code" style="font-size: 1.15rem; padding: 0.4rem 1rem;">{{ ticket['ticket_number'] }}</span>
+                </div>
+            </div>
+
+            <div class="ticket-row">
+                <span style="color: var(--text-muted);">Participant Name</span>
+                <strong>{{ ticket['name'] }}</strong>
+            </div>
+
+            <div class="ticket-row">
+                <span style="color: var(--text-muted);">Phone Number</span>
+                <strong>{{ ticket['phone'] }}</strong>
+            </div>
+
+            <div class="ticket-row" style="background: rgba(245, 158, 11, 0.1); padding: 0.8rem; border-radius: 6px;">
+                <span style="color: #fbbf24; font-weight: 700;">Selected Lucky Box</span>
+                {% if ticket['box_number'] %}
+                    <strong style="color: #fbbf24; font-size: 1.3rem;">📦 BOX #{{ ticket['box_number'] }}</strong>
+                {% else %}
+                    <a href="{{ url_for('select_box', ticket_id=ticket['id']) }}" class="btn btn-primary" style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">Choose Box</a>
+                {% endif %}
+            </div>
+
+            <!-- Payment Details Row -->
+            <div class="ticket-row">
+                <span style="color: var(--text-muted);">Payment Method</span>
+                {% if ticket['payment_method'] == 'CBE' %}
+                    <strong style="color: #f8fafc;">🏦 CBE (Acc: {{ cbe_account }})</strong>
+                {% elif ticket['payment_method'] == 'Telebirr' %}
+                    <strong style="color: #38bdf8;">📱 Telebirr ({{ telebirr_account }})</strong>
+                {% else %}
+                    <a href="{{ url_for('payment', ticket_id=ticket['id']) }}" class="btn btn-primary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">Pay Now</a>
+                {% endif %}
+            </div>
+
+            {% if ticket['payment_reference'] %}
+                <div class="ticket-row">
+                    <span style="color: var(--text-muted);">Payment Ref / TX ID</span>
+                    <span class="badge-code" style="font-size: 0.85rem;">{{ ticket['payment_reference'] }}</span>
+                </div>
+            {% endif %}
+
+            <div class="ticket-row">
+                <span style="color: var(--text-muted);">Payment Status</span>
+                {% if ticket['payment_status'] == 'Confirmed' %}
+                    <span class="badge badge-winner">✅ Payment Confirmed</span>
+                {% elif ticket['payment_status'] == 'Pending' %}
+                    <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid #f59e0b;">⏳ Pending Verification</span>
+                {% else %}
+                    <span class="badge" style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444;">Unpaid</span>
+                {% endif %}
+            </div>
+
+            <div class="ticket-row">
+                <span style="color: var(--text-muted);">Total Fee Paid</span>
+                <strong style="color: #34d399;">100.05 Birr <small style="font-weight: normal; color: var(--text-muted);">(100.00 + 0.05 Fee)</small></strong>
+            </div>
+
+            {% if ticket['lucky_numbers'] %}
+                <div class="ticket-row">
+                    <span style="color: var(--text-muted);">Lucky Numbers</span>
+                    <strong style="color: var(--accent-gold);">{{ ticket['lucky_numbers'] }}</strong>
+                </div>
+            {% endif %}
+
+            <div class="ticket-row">
+                <span style="color: var(--text-muted);">Registered Date</span>
+                <span style="font-size: 0.9rem;">{{ ticket['registered_at'] }}</span>
+            </div>
+
+            <div class="ticket-row">
+                <span style="color: var(--text-muted);">Draw Outcome</span>
+                {% if ticket['is_winner'] == 1 %}
+                    <span class="badge badge-winner" style="font-size: 0.9rem;">🏆 JACKPOT WINNER!</span>
+                {% else %}
+                    <span class="badge badge-active">Active in Draw</span>
+                {% endif %}
+            </div>
+
+            <div style="text-align: center; margin-top: 1.5rem; font-size: 0.8rem; color: var(--text-muted);">
+                <p>Keep this receipt or screenshot safe. Official results announced upon live draw.</p>
+                <p>Helpline: <strong>{{ contact_phone }}</strong></p>
+            </div>
+        </div>
+
+        <!-- Action Controls -->
+        <div class="no-print" style="text-align: center; margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <button onclick="window.print()" class="btn btn-primary">
+                🖨️ Print / Save Receipt
+            </button>
+            {% if not ticket['payment_method'] %}
+                <a href="{{ url_for('payment', ticket_id=ticket['id']) }}" class="btn btn-green">
+                    💳 Complete Payment (CBE / Telebirr)
+                </a>
+            {% endif %}
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                🏠 Back to Home Dashboard
+            </a>
+            <a href="{{ url_for('boxes_grid') }}" class="btn btn-action">
+                📦 View 200 Boxes Board
+            </a>
+        </div>
+
+        <!-- Footer -->
+        <footer class="no-print">
+            <p>&copy; 2026 Bayisa Chance Lottery System &bull; Helpline: <a href="tel:{{ contact_phone }}" style="color: var(--accent-gold);">{{ contact_phone }}</a></p>
+        </footer>
+    </div>
+</body>
+</html>

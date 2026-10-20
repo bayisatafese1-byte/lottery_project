@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Account &amp; Ticket - Bayisa Chance Lottery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .fee-pill {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px dashed #10b981;
+            border-radius: var(--radius-sm);
+            padding: 0.85rem 1.25rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .auth-toggle-box {
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 0.85rem 1.2rem;
+            margin-bottom: 1.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <a href="{{ url_for('index') }}" class="logo">
+                <span class="logo-icon">🎰</span>
+                <div>
+                    <h1>Bayisa Chance Lottery</h1>
+                    <small style="color: var(--text-muted);">Account Registration &bull; Round #{{ stats.active_round }}</small>
+                </div>
+            </a>
+            <nav class="nav-links">
+                <a href="{{ url_for('index') }}" class="nav-item">🏠 Home</a>
+                <a href="{{ url_for('boxes_grid') }}" class="nav-item">📦 200 Boxes</a>
+                {% if current_user %}
+                    <a href="{{ url_for('my_tickets') }}" class="nav-item">🎟️ My Tickets ({{ current_user.name }})</a>
+                    <a href="{{ url_for('logout') }}" class="btn btn-secondary" style="padding: 0.35rem 0.75rem; font-size: 0.85rem;">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login', box=selected_box) }}" class="btn btn-secondary" style="padding: 0.35rem 0.85rem; font-size: 0.85rem;">🔑 Log In</a>
+                {% endif %}
+                <a href="{{ url_for('contact') }}" class="nav-item">📞 Contact</a>
+            </nav>
+        </header>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Registration Form Card -->
+        <div class="form-card">
+            <!-- Account Prompt Banner -->
+            {% if not current_user %}
+                <div class="auth-toggle-box">
+                    <div>
+                        <span style="font-weight: 700; color: #fbbf24;">Already have an account?</span>
+                        <p style="color: var(--text-muted); font-size: 0.85rem;">Log in to use your saved details and track your tickets.</p>
+                    </div>
+                    <a href="{{ url_for('login', box=selected_box) }}" class="btn btn-primary" style="padding: 0.45rem 1rem; font-size: 0.85rem;">
+                        🔑 Log In Here
+                    </a>
+                </div>
+            {% else %}
+                <div class="auth-toggle-box" style="border-color: #10b981; background: rgba(16, 185, 129, 0.08);">
+                    <div>
+                        <span style="color: #34d399; font-weight: 700;">👤 Logged in as: {{ current_user.name }}</span>
+                        <small style="display: block; color: var(--text-muted);">Phone: {{ current_user.phone }}</small>
+                    </div>
+                    <a href="{{ url_for('my_tickets') }}" class="btn btn-secondary" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                        View My Tickets
+                    </a>
+                </div>
+            {% endif %}
+
+            <h2>🎟️ Register Your Lucky Ticket</h2>
+            <p class="subtitle">Join <strong>Round #{{ stats.active_round }}</strong> and pick your lucky box from the 200 available slots!</p>
+
+            <!-- Fee & Price Breakdown Pill -->
+            <div class="fee-pill">
+                <div>
+                    <span style="color: var(--text-muted); font-size: 0.85rem;">Ticket Price: <strong>100.00 Birr</strong> + Fee: <strong>0.05 Birr</strong></span>
+                </div>
+                <div>
+                    <span style="font-size: 0.9rem; color: var(--text-muted);">Total to Pay:</span>
+                    <strong style="font-size: 1.25rem; color: #34d399; margin-left: 0.4rem;">100.05 Birr</strong>
+                </div>
+            </div>
+
+            <form action="{{ url_for('register', box=selected_box) }}" method="POST">
+                {% if not current_user %}
+                    <!-- Participant Name -->
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input 
+                            type="text" 
+                            id="name" 
+                            name="name" 
+                            class="form-control" 
+                            placeholder="e.g. Bayisa Alemu" 
+                            value="{{ name if name else '' }}" 
+                            required
+                        >
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div class="form-group">
+                        <label for="phone">Phone Number (Used for Login &amp; Contact) *</label>
+                        <input 
+                            type="tel" 
+                            id="phone" 
+                            name="phone" 
+                            class="form-control" 
+                            placeholder="e.g. 0911223344" 
+                            value="{{ phone if phone else '' }}" 
+                            required
+                        >
+                    </div>
+
+                    <!-- Password -->
+                    <div class="form-group">
+                        <label for="password">Create Account Password *</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            class="form-control" 
+                            placeholder="Choose a password to log back in anytime" 
+                            required
+                        >
+                        <small style="color: var(--text-muted); display: block; margin-top: 0.3rem;">
+                            You will use this password to log in and check your tickets.
+                        </small>
+                    </div>
+
+                    <!-- Email (Optional) -->
+                    <div class="form-group">
+                        <label for="email">Email Address <span style="color: var(--text-muted); font-weight: normal;">(Optional)</span></label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            class="form-control" 
+                            placeholder="e.g. participant@example.com" 
+                            value="{{ email if email else '' }}"
+                        >
+                    </div>
+                {% endif %}
+
+                <!-- Box Number Selection (1 - 200) -->
+                <div class="form-group">
+                    <label for="box_number">
+                        Lucky Box Number (1 to 200) 
+                        <span style="color: var(--accent-gold); font-weight: normal;">(Optional - or choose visually next)</span>
+                    </label>
+                    <input 
+                        type="number" 
+                        id="box_number" 
+                        name="box_number" 
+                        min="1" 
+                        max="200" 
+                        class="form-control" 
+                        placeholder="e.g. 45 (or leave empty to pick visually)" 
+                        value="{{ selected_box if selected_box else '' }}"
+                    >
+                    <small style="color: var(--text-muted); display: block; margin-top: 0.35rem;">
+                        {% if selected_box %}
+                            ⭐ Box #{{ selected_box }} pre-selected from the grid!
+                        {% else %}
+                            Tip: Leave empty and click below to view all 200 interactive boxes on the next screen.
+                        {% endif %}
+                    </small>
+                </div>
+
+                <!-- Lucky Numbers -->
+                <div class="form-group">
+                    <label for="lucky_numbers">
+                        Lucky Lottery Balls (Optional)
+                    </label>
+                    <div class="lucky-input-group" style="display: flex; gap: 0.5rem;">
+                        <input 
+                            type="text" 
+                            id="lucky_numbers" 
+                            name="lucky_numbers" 
+                            class="form-control" 
+                            placeholder="e.g. 07, 14, 21, 35, 49" 
+                            value="{{ lucky_numbers if lucky_numbers else '' }}"
+                        >
+                        <button type="button" class="quick-pick-btn" onclick="generateQuickPick()">
+                            ✨ Quick Pick
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 0.95rem; font-size: 1.1rem; margin-top: 0.5rem;">
+                    {% if selected_box %}
+                        🔒 Reserve Box #{{ selected_box }} &bull; Pay 100.05 Birr ➔
+                    {% else %}
+                        🚀 Next: Select From 200 Boxes (100.05 Birr) ➔
+                    {% endif %}
+                </button>
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2026 Bayisa Chance Lottery System &bull; Support: <a href="tel:0952458502" style="color: var(--accent-gold);">0952458502</a></p>
+        </footer>
+    </div>
+
+    <!-- Quick Pick JavaScript -->
+    <script>
+        function generateQuickPick() {
+            const numbers = [];
+            while (numbers.length < 5) {
+                const rand = Math.floor(Math.random() * 50) + 1;
+                if (!numbers.includes(rand)) {
+                    numbers.push(rand);
+                }
+            }
+            numbers.sort((a, b) => a - b);
+            const formatted = numbers.map(n => n.toString().padStart(2, '0')).join(', ');
+            document.getElementById('lucky_numbers').value = formatted;
+        }
+    </script>
+</body>
+</html>

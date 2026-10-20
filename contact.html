@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact &amp; Support - Bayisa Chance Lottery</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <a href="{{ url_for('index') }}" class="logo">
+                <span class="logo-icon">🎰</span>
+                <div>
+                    <h1>Bayisa Chance Lottery</h1>
+                    <small style="color: var(--text-muted);">Customer Care &amp; Agent Support</small>
+                </div>
+            </a>
+            <nav class="nav-links">
+                <a href="{{ url_for('index') }}" class="nav-item">🏠 Home</a>
+                <a href="{{ url_for('boxes_grid') }}" class="nav-item">📦 200 Boxes Grid</a>
+                <a href="{{ url_for('register') }}" class="nav-item">🎟️ Register Ticket</a>
+                <a href="{{ url_for('check_ticket') }}" class="nav-item">🔍 Check Ticket</a>
+                <a href="{{ url_for('contact') }}" class="nav-item active">📞 Contact (0952458502)</a>
+                <a href="{{ url_for('admin') }}" class="nav-item">⚙️ Admin</a>
+            </nav>
+        </header>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">
+                            <span>{{ message }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Contact Highlight Header -->
+        <div style="text-align: center; margin: 2rem 0 3rem;">
+            <h2 style="font-size: 2.2rem; color: #fbbf24; margin-bottom: 0.5rem;">📞 Get in Touch With Us</h2>
+            <p style="color: var(--text-muted); max-width: 600px; margin: 0 auto;">
+                Have questions about your ticket, 200-box selection, or claiming your jackpot prize? 
+                Our team is here to assist you anytime.
+            </p>
+        </div>
+
+        <!-- Contact Options Grid -->
+        <div class="contact-grid">
+            <!-- Direct Phone Call Card -->
+            <div class="contact-card">
+                <div class="contact-icon">📱</div>
+                <h3>Official Helpline</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Direct phone call for instant inquiries &amp; verification</p>
+                <a href="tel:0952458502" class="phone-highlight">0952458502</a>
+                <a href="tel:0952458502" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    📞 Call 0952458502 Now
+                </a>
+            </div>
+
+            <!-- WhatsApp & Telegram Support -->
+            <div class="contact-card">
+                <div class="contact-icon">💬</div>
+                <h3>Social Chat Support</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Chat with our support agent on Telegram or WhatsApp</p>
+                <a href="https://wa.me/251952458502" target="_blank" class="phone-highlight" style="color: #34d399;">+251 95 245 8502</a>
+                <div style="display: flex; gap: 0.5rem; justify-content: center; flex-direction: column;">
+                    <a href="https://wa.me/251952458502" target="_blank" class="btn btn-green" style="justify-content: center;">
+                        🟢 Chat on WhatsApp
+                    </a>
+                    <a href="https://t.me/+251952458502" target="_blank" class="btn btn-secondary" style="justify-content: center;">
+                        ✈️ Chat on Telegram
+                    </a>
+                </div>
+            </div>
+
+            <!-- Hours & Office Card -->
+            <div class="contact-card">
+                <div class="contact-icon">⏰</div>
+                <h3>Service Hours</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Available 7 Days a Week</p>
+                <div style="margin: 1.5rem 0; font-size: 1.1rem; font-weight: 700; color: #fbbf24;">
+                    8:00 AM – 10:00 PM (EAT)
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">
+                    📍 Addis Ababa, Ethiopia<br>
+                    Licensed Bayisa Chance Lottery Distribution
+                </p>
+            </div>
+        </div>
+
+        <!-- Quick Inquiry Form -->
+        <div class="form-card" style="margin-top: 2rem;">
+            <h2>✉️ Send Us a Message</h2>
+            <p class="subtitle">Fill in the form and an agent will call or reply to you promptly.</p>
+
+            <form action="{{ url_for('contact') }}" method="POST">
+                <div class="form-group">
+                    <label for="name">Your Name *</label>
+                    <input type="text" id="name" name="name" class="form-control" placeholder="e.g. Kebede Tola" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Your Phone Number *</label>
+                    <input type="tel" id="phone" name="phone" class="form-control" placeholder="e.g. 0912345678" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Message or Ticket Inquiry *</label>
+                    <textarea id="message" name="message" class="form-control" rows="4" placeholder="Write your question, box inquiry, or feedback here..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    🚀 Send Message to Agent
+                </button>
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2026 Bayisa Chance Lottery System &bull; Official Helpline: <a href="tel:0952458502" style="color: var(--accent-gold);">0952458502</a></p>
+        </footer>
+    </div>
+</body>
+</html>
